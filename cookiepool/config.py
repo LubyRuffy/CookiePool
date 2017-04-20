@@ -10,7 +10,7 @@ REDIS_NAME = '*'
 
 YUNDAMA_USERNAME = 'Germey'
 
-YUNDAMA_PASSWORD = '940629cqc'
+YUNDAMA_PASSWORD = 'your_password'
 
 YUNDAMA_APP_ID = '3372'
 
@@ -20,8 +20,14 @@ YUNDAMA_API_URL = 'http://api.yundama.com/api.php'
 
 YUNDAMA_MAX_RETRY = 20
 
-DEFAULT_BROWSER = 'Chrome'
+DEFAULT_BROWSER = 'PhantomJS'
 
 GENERATOR_MAP = {
     'weibo': 'WeiboCookiesGenerator'
 }
+
+TESTER_MAP = {
+    'weibo': 'WeiboValidTester'
+}
+
+VALID_CHECK_CYCLE = 120

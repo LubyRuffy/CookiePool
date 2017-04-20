@@ -86,12 +86,12 @@ class WeiboCookiesGenerator(CookiesGenerator):
         print('Generating Cookies of', username)
         self.browser.get('https://weibo.cn/login/')
         self.browser.delete_all_cookies()
-        user = self.browser.find_element_by_name("mobile")
-        user.send_keys(username)
-        psd = self.browser.find_element_by_xpath('//input[@type="password"]')
-        psd.send_keys(password)
 
         try:
+            user = self.browser.find_element_by_name("mobile")
+            user.send_keys(username)
+            psd = self.browser.find_element_by_xpath('//input[@type="password"]')
+            psd.send_keys(password)
             code = self.browser.find_element_by_name("code")
             code.clear()
             img = self.browser.find_element_by_xpath('//form[@method="post"]/div/img[@alt="请打开图片显示"]')

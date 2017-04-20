@@ -1,7 +1,7 @@
 import json
 from bs4 import BeautifulSoup
 import requests
-
+from requests.exceptions import ConnectionError
 from cookiepool.db import *
 from cookiepool.generator import WeiboCookiesGenerator
 
@@ -32,22 +32,26 @@ class WeiboValidTester(ValidTester):
         print('Testing Account', account['username'])
         try:
             cookies = json.loads(cookies)
-        except:
+        except TypeError:
             # Cookie 格式不正确
             print('Invalid Cookies Value', account.get('username'))
             self.generator.set_cookies(account)
             return None
-        response = requests.get('http://weibo.cn', cookies=cookies)
-        if response.status_code == 200:
-            html = response.text
-            soup = BeautifulSoup(html, 'lxml')
-            title = soup.title.string
-            if title == '我的首页':
-                print('Valid Cookies', account.get('username'))
-            else:
-                # Cookie已失效
-                self.generator.set_cookies(account)
-                print('Invalid Cookies', account.get('username'))
+        try:
+            response = requests.get('http://weibo.cn', cookies=cookies)
+            if response.status_code == 200:
+                html = response.text
+                soup = BeautifulSoup(html, 'lxml')
+                title = soup.title.string
+                if title == '我的首页':
+                    print('Valid Cookies', account.get('username'))
+                else:
+                    # Cookie已失效
+                    print('Invalid Cookies', account.get('username'))
+                    self.generator.set_cookies(account)
+        except ConnectionError:
+            print('Invalid Cookies', account.get('username'))
+            self.generator.set_cookies(account)
 
 
 if __name__ == '__main__':
