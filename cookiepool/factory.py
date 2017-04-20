@@ -7,9 +7,7 @@ class CookiesFactory():
         """
         初始化操作, 定义工厂模式调用映射
         """
-        self.map = {
-            'weibo': 'WeiboCookiesGenerator'
-        }
+        self.map = GENERATOR_MAP
 
     def produce(self, name, browser=DEFAULT_BROWSER):
         """

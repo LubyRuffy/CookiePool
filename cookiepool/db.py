@@ -110,6 +110,14 @@ class CookiesRedisClient(RedisClient):
         except:
             raise GetRandomCookieError
 
+    def count(self):
+        """
+        获取当前Cookies数目
+        :return: 数目
+        """
+        return len(self.keys())
+
+
 
 class AccountRedisClient(RedisClient):
     def __init__(self, host=REDIS_HOST, port=REDIS_PORT, password=REDIS_PASSWORD, domain='account', name='default'):
