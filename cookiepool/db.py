@@ -91,7 +91,7 @@ class CookiesRedisClient(RedisClient):
         try:
             return self._db.get(self._key(key)).decode('utf-8')
         except:
-            raise GetCookieError
+            return None
 
     def delete(self, key):
         try:

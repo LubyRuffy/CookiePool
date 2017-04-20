@@ -38,6 +38,18 @@ class CookiesGenerator(object):
     def new_cookies(self, username, password):
         raise NotImplementedError
 
+    def set_cookies(self, account):
+        """
+        根据账户设置新的Cookies
+        :param account:
+        :return:
+        """
+        results = self.new_cookies(account.get('username'), account.get('password'))
+        if results:
+            username, cookies = results
+            print('Saving Cookies to Redis', username, cookies)
+            self.cookies_db.set(username, cookies)
+
     def run(self):
         """
         运行, 得到所有账户, 然后顺次模拟登录
@@ -47,11 +59,7 @@ class CookiesGenerator(object):
         print('Getting', len(accounts), ' from Redis')
         for account in accounts:
             print('Getting Cookies of ', self.name, account.get('username'), account.get('password'))
-            results = self.new_cookies(account.get('username'), account.get('password'))
-            if results:
-                username, cookies = results
-                print('Saving Cookies to Redis', username, cookies)
-                self.cookies_db.set(username, cookies)
+            self.set_cookies(account)
 
     def __del__(self):
         self.browser.quit()
@@ -75,7 +83,9 @@ class WeiboCookiesGenerator(CookiesGenerator):
         :param password: 密码
         :return: 用户名和Cookies
         """
+        print('Generating Cookies of', username)
         self.browser.get('https://weibo.cn/login/')
+        self.browser.delete_all_cookies()
         user = self.browser.find_element_by_name("mobile")
         user.send_keys(username)
         psd = self.browser.find_element_by_xpath('//input[@type="password"]')

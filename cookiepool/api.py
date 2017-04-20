@@ -21,7 +21,6 @@ def get_conn():
         print(name)
         if not hasattr(g, name):
             setattr(g, name, eval('CookiesRedisClient' + '(name="' + name + '")'))
-    print(g)
     return g
 
 
