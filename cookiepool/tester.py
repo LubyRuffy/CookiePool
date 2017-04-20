@@ -1,0 +1,2 @@
+class ValidTester(object):
+    pass

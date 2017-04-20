@@ -44,6 +44,7 @@ class CookiesGenerator(object):
         :return:
         """
         accounts = self.account_db.all()
+        print('Getting', len(accounts), ' from Redis')
         for account in accounts:
             print('Getting Cookies of ', self.name, account.get('username'), account.get('password'))
             results = self.new_cookies(account.get('username'), account.get('password'))
