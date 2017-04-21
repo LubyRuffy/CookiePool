@@ -127,7 +127,7 @@ class AccountRedisClient(RedisClient):
 
     def set(self, key, value):
         try:
-            self._db.set(self._key(key), value)
+            return self._db.set(self._key(key), value)
         except:
             raise SetAccountError
 

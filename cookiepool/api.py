@@ -1,6 +1,6 @@
 from flask import Flask, g
 from cookiepool.config import *
-from cookiepool.db import CookiesRedisClient
+from cookiepool.db import CookiesRedisClient, AccountRedisClient
 
 __all__ = ['app']
 
@@ -20,7 +20,8 @@ def get_conn():
     for name in GENERATOR_MAP:
         print(name)
         if not hasattr(g, name):
-            setattr(g, name, eval('CookiesRedisClient' + '(name="' + name + '")'))
+            setattr(g, name + '_cookies', eval('CookiesRedisClient' + '(name="' + name + '")'))
+            setattr(g, name + '_account', eval('AccountRedisClient' + '(name="' + name + '")'))
     return g
 
 
@@ -31,8 +32,17 @@ def random(name):
     :return: 随机Cookie
     """
     g = get_conn()
-    cookies = getattr(g, name).random()
+    cookies = getattr(g, name + '_cookies').random()
     return cookies
+
+@app.route('/<name>/add/<username>/<password>')
+def add(name, username, password):
+    """
+    添加用户, 访问地址如 /weibo/add/user/password
+    """
+    g = get_conn()
+    result = getattr(g, name + '_account').set(username, password)
+    return result
 
 
 @app.route('/<name>/count')
@@ -41,7 +51,7 @@ def count(name):
     获取Cookies总数
     """
     g = get_conn()
-    count = getattr(g, name).count()
+    count = getattr(g, name + '_cookies').count()
     return str(int) if isinstance(count, int) else count
 
 
