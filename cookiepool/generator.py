@@ -7,6 +7,7 @@ from selenium.common.exceptions import WebDriverException
 from cookiepool.db import CookiesRedisClient, AccountRedisClient
 from cookiepool.verify import Yundama
 from cookiepool.config import *
+from requests.exceptions import ConnectionError
 
 
 class CookiesGenerator(object):
@@ -122,7 +123,9 @@ class WeiboCookiesGenerator(CookiesGenerator):
                     cookies[cookie["name"]] = cookie["value"]
 
                 return (username, json.dumps(cookies))
-
+        except ConnectionError as e:
+            print(e.args)
+            print('验证码获取失败, 跳过')
         except WebDriverException as e:
             print(e.args)
 
