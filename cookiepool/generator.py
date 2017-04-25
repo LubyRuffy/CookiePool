@@ -63,7 +63,8 @@ class CookiesGenerator(object):
             self.set_cookies(account)
 
     def __del__(self):
-        self.browser.quit()
+        if hasattr(self, 'browser'):
+            self.browser.quit()
 
 
 class WeiboCookiesGenerator(CookiesGenerator):
@@ -75,7 +76,7 @@ class WeiboCookiesGenerator(CookiesGenerator):
         """
         CookiesGenerator.__init__(self, name, browser)
         self.name = name
-        self.ydm = Yundama(YUNDAMA_USERNAME, YUNDAMA_PASSWORD, YUNDAMA_APP_ID, YUNDAMA_APP_KEY)
+        # self.ydm = Yundama(YUNDAMA_USERNAME, YUNDAMA_PASSWORD, YUNDAMA_APP_ID, YUNDAMA_APP_KEY)
 
     def new_cookies(self, username, password):
         """
@@ -85,57 +86,44 @@ class WeiboCookiesGenerator(CookiesGenerator):
         :return: 用户名和Cookies
         """
         print('Generating Cookies of', username)
-        self.browser.delete_all_cookies()
-        self.browser.get('https://weibo.cn/login/')
 
+        url = 'https://passport.weibo.cn/sso/login'
+        data = {
+            'username': username,
+            'password': password,
+            'savestate': '1',
+            'r': 'http://weibo.cn/',
+            'ec': '0',
+            'pagerefer': 'http://weibo.cn/pub/',
+            'entry': 'mweibo',
+            'mainpageflag': '1'
+        }
+        headers = {
+            'Accept': '*/*',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Accept-Language': 'zh-CN,zh;q=0.8,en;q=0.6,ja;q=0.4,zh-TW;q=0.2',
+            'Connection': 'keep-alive',
+            'Content-Length': '210',
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Host': 'passport.weibo.cn',
+            'Origin': 'https://passport.weibo.cn',
+            'Referer': 'https://passport.weibo.cn/signin/login?entry=mweibo&r=http%3A%2F%2Fweibo.cn%2F&backTitle=%CE%A2%B2%A9&vt=',
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36',
+        }
         try:
-            user = self.browser.find_element_by_name("mobile")
-            user.send_keys(username)
-            psd = self.browser.find_element_by_xpath('//input[@type="password"]')
-            psd.send_keys(password)
-            code = self.browser.find_element_by_name("code")
-            code.clear()
-            img = self.browser.find_element_by_xpath('//form[@method="post"]/div/img[@alt="请打开图片显示"]')
-            src = img.get_attribute('src')
-            response = requests.get(src)
-            result = self.ydm.identify(stream=response.content)
-            if not result:
-                print('验证码识别失败, 跳过识别')
-                return
-            code.send_keys(result)
-            submit = self.browser.find_element_by_name("submit")
-            submit.click()
-            time.sleep(2)
-            html = self.browser.page_source
-
-            if "验证码错误" in html or '登录名及密码不得为空' in html or '登录名或密码错误' in html:
-                print('登录失败')
-                print(html)
-                return
-            if '未激活微博' in html:
-                print('账号未开通微博')
-                return
-            self.browser.get('http://weibo.cn/')
-            print('Getting Weibo Index')
-            print(self.browser.title)
-            if "我的首页" in self.browser.title:
-                print(self.browser.get_cookies())
-                cookies = {}
-                for cookie in self.browser.get_cookies():
-                    cookies[cookie["name"]] = cookie["value"]
-
-                return (username, json.dumps(cookies))
-            if "Sina Visitor System" in self.browser.title or '微博-随时随地发现新鲜事' in self.browser.title:
-                print('账号已被封禁, 清除账号中')
-                self.account_db.delete(username)
-
-        except ConnectionError as e:
-            print(e.args)
-            print('验证码获取失败, 跳过')
-        except WebDriverException as e:
-            print(e.args)
+            s = requests.Session()
+            response = s.post(url, data=data, headers=headers)
+            result = json.loads(response.text)
+            if result.get('retcode') == 20000000:
+                return (username, dict(s.cookies))
+            else:
+                print(result.get('msg'))
+                print(result)
+        except ConnectionError:
+            print('登录失败，跳过登录')
 
 
 if __name__ == '__main__':
     generator = WeiboCookiesGenerator()
-    generator.run()
+    cookies = generator.new_cookies('13467553219', 'trbnbl199')
+    print(cookies)
