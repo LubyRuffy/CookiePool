@@ -85,8 +85,8 @@ class WeiboCookiesGenerator(CookiesGenerator):
         :return: 用户名和Cookies
         """
         print('Generating Cookies of', username)
-        self.browser.get('https://weibo.cn/login/')
         self.browser.delete_all_cookies()
+        self.browser.get('https://weibo.cn/login/')
 
         try:
             user = self.browser.find_element_by_name("mobile")
@@ -110,12 +110,14 @@ class WeiboCookiesGenerator(CookiesGenerator):
 
             if "验证码错误" in html or '登录名及密码不得为空' in html or '登录名或密码错误' in html:
                 print('登录失败')
+                print(html)
                 return
             if '未激活微博' in html:
                 print('账号未开通微博')
                 return
             self.browser.get('http://weibo.cn/')
-
+            print('Getting Weibo Index')
+            print(self.browser.title)
             if "我的首页" in self.browser.title:
                 print(self.browser.get_cookies())
                 cookies = {}
@@ -123,6 +125,10 @@ class WeiboCookiesGenerator(CookiesGenerator):
                     cookies[cookie["name"]] = cookie["value"]
 
                 return (username, json.dumps(cookies))
+            if "Sina Visitor System" in self.browser.title or '微博-随时随地发现新鲜事' in self.browser.title:
+                print('账号已被封禁, 清除账号中')
+                self.account_db.delete(username)
+
         except ConnectionError as e:
             print(e.args)
             print('验证码获取失败, 跳过')

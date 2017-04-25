@@ -20,7 +20,7 @@ YUNDAMA_API_URL = 'http://api.yundama.com/api.php'
 
 YUNDAMA_MAX_RETRY = 20
 
-DEFAULT_BROWSER = 'PhantomJS'
+DEFAULT_BROWSER = 'Chrome'
 
 GENERATOR_MAP = {
     'weibo': 'WeiboCookiesGenerator'
